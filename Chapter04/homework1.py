@@ -11,77 +11,58 @@ plt.plot(df['x'], df['y'], marker="o")
 X, y = df["x"].to_numpy().reshape(-1, 1), df["y"].to_numpy().reshape(-1, 1)     # X (20, 1) ,y (20, 1)
 
 
-# problem function
+# define model and predict ftn
 
-def p2_ftn(x, w):
-    """
-    Args:
-        x (scalar (N, 1)) : input
-        w (ndarray (1, 3)) : weights
-    Returns:
-        X (ndarray (N, 3))
-    """
-    X = x ** np.arange(3)
-    return X @ w.T
+def predict(X, w):
+    return w[0] + w[1] * X + w[2] * X**2
 
+def compute_loss(y_pred, y_true):
+    return np.mean((y_pred - y_true) ** 2)
 
-def pw_ftn_diff(x):
-    """
-    Returns:
-        (N, 3)
-    """
-    return np.array([np.ones_like(x), x, x**2])
+def compute_gradients(X, y_true, w):
+    y_pred = predict(X, w)
+    error = y_pred - y_true
 
+    grad_w0 = np.mean(2 * error)
+    grad_w1 = np.mean(2 * error * X)
+    grad_w2 = np.mean(2 * error * X**2)
 
-# loss
+    return np.array([grad_w0, grad_w1, grad_w2])
 
-class Loss:
-    def forward():
-        raise NotImplementedError
-    def backward():
-        raise NotImplementedError
+def train_model(X, y, learning_rate=0.01, epochs=10000):
+    
+    # 매개변수 초기화
+    np.random.seed(42)
+    w = np.random.rand(3) * 0.1
 
-class Least_square(Loss):
-    def __init__(self, n, function, diff):
-        self.cost = 0
-        self.function = function
-        self.diff = diff
-        self.N = n      # x.shape[0]
-    def forward(self, x, w, y):
-        return np.sum((self.function(x, w) - y) ** 2) / (2 * self.N)
-    def backward(self, x, w, y):
-        return np.sum((self.function(x, w) - y) * self.diff(x), axis=1).reshape(1, 3) / self.N   # (, 3)
+    history = []
 
+    for epoch in range(epochs):
+        # 예측 및 손실 계산
+        y_pred = predict(X, w)
+        loss = compute_loss(y_pred, y)
 
-def chi_square(x, y, std):
-    pass
+        # 기울기 계산
+        grad = compute_gradients(X, y, w)
 
+        # 매개변수 업데이트 (경사 하강법)
+        w -= learning_rate * grad
+        
+        history.append(loss)
 
-# backpropagation
+        if (epoch) % 200 == 0:
+            print(f"Epoch {epoch:4f}/{epochs} | Loss: {loss:.4f} | w0: {w[0]:.4f}, w1:{w[1]:.4f}, w2: {w[2]:.4f}")
+        
+    return w, history
+    
+print("--- 학습 시작 ---")
 
-def gb(w, gradient, lr=0.01):
-    w -= lr * gradient
-    return w
-
-
-
-# Network
-
-iterations = 10
-
-w = np.array([[10, -10, -5]], dtype=float)   # w (1, 3)
-
-loss_l = Least_square(X.shape[0], p2_ftn, pw_ftn_diff)
-
-for i in range(iterations):
-    y_pred = p2_ftn(X, w)
-    loss_l.cost += loss_l.forward(X, w, y)
-    grad = loss_l.backward(X, w, y)
-
-
-    w = gb(w, grad)
+w, history = train_model(X, y)
 
 print(w)
 
-plt.plot(X, p2_ftn(X, w), marker="o")
+y = w[0] + w[1] * X + w[2] * X**2
+
+plt.plot(X, y, marker="x")
+
 plt.show()
