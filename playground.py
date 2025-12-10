@@ -1,7 +1,17 @@
-import numpy as np
+class Question:
+    def __init__(self, a):
+        self.a = a
+    def quest(self):
+        print(f"{self.a}")
 
-a = np.ones((5, 1))
-print(a)
+# 클래스 인스턴스
 
-b = np.array([np.ones_like(a), a])
-print(b)
+ask = Question("안녕")  # self.a = "안녕"
+ask.quest()
+
+class sub_Question(Question):
+    print(1)
+print(2)
+sub_a = sub_Question("hi")
+sub_a.quest()
+

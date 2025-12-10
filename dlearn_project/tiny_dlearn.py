@@ -41,7 +41,7 @@ def show_tensor_images(dataset, n_rows=5, n_cols=10):
     plt.tight_layout()  
     plt.show()
 
-# show_tensor_images(train_dataset)
+show_tensor_images(train_dataset)
 
 
 ## 화이트박스 딥러닝 모델
